@@ -18,6 +18,21 @@ from menu_tools.utils import constants
 from menu_tools.utils import objects
 from menu_tools.utils import scalings
 
+from scipy.stats import beta, norm
+
+def get_eff_err(npass,ntot, alpha=1 - 0.68):
+    
+    x = npass
+    n = ntot
+    
+    lo_bound = beta.ppf(alpha / 2, x, n - x + 1)
+    eff_err_lo = x / n - np.nan_to_num(lo_bound, nan=0.0)
+    hi_bound = beta.ppf(1 - alpha / 2, x + 1, n - x)
+    eff_err_hi = np.nan_to_num(hi_bound, nan=1.0) - x / n
+
+    eff_err_avg = (abs(eff_err_lo) + abs(eff_err_hi))/2
+    
+    return eff_err_avg, eff_err_lo, eff_err_hi
 
 vector.register_awkward()
 
@@ -30,8 +45,14 @@ class MenuTable:
     All the relevant information is dumped to a csv table.
     """
 
-    def __init__(self, config: dict):
-        self.config: MenuConfig = MenuConfig(config)
+    def __init__(self, config: dict, config_version: Optional[str] = None, override_version: Optional[str] = None):
+        self.config: MenuConfig = MenuConfig(config, config_version=config_version, override_version=override_version)
+        
+        print(f"INFO: Loading cached inputs from cache/{self.config.version}")
+        print(f"INFO: Saving outputs to outputs/{self.config.version}/rate_tables")
+        print(f"INFO: Loading object configs from configs/{self.config.config_version_for_objects}/objects")
+        print(f"INFO: Loading scalings from outputs/{self.config.version}/object_performance/scalings")
+        
         self.arr_cache = {}
         self.table: Optional[list[dict[str, Union[str, float]]]] = None
         self._trigger_seeds: Optional[dict] = None
@@ -86,7 +107,7 @@ class MenuTable:
             arr: Array of cached `object_name` object from sample specified in
             config
         """
-        obj = objects.Object(object_name, self.config.version)
+        obj = objects.Object(object_name, self.config.config_version_for_objects)
         fpath = os.path.join(
             "cache",
             self.config.version,
@@ -112,9 +133,10 @@ class MenuTable:
             and ("disp" not in object_name.lower())
             and ("TrackTripletWord" not in object_name)
             and ("ExtTrackHT" not in object_name)
+            and ("mass" not in object_name)
         ):
             print("adding scalings")
-            arr = scalings.add_offline_pt(arr, obj)
+            arr = scalings.add_offline_pt(arr, obj, scaling_version=self.config.version)
 
         if "idx" not in arr.fields:
             arr["idx"] = ak.local_index(arr)
@@ -163,7 +185,7 @@ class MenuTable:
                 raw_object_arrays[leg["obj"]] = self.arr_cache[leg["obj"]]
 
             # Prepare object ID mask
-            obj = objects.Object(leg["obj"], self.config.version)
+            obj = objects.Object(leg["obj"], self.config.config_version_for_objects)
             obj_mask = objects.compute_selection_mask_for_object_cuts(
                 obj, raw_object_arrays[leg["obj"]]
             )
@@ -377,8 +399,11 @@ class MenuTable:
             # Compute seed values
             npass = ak.sum(mask)
             efficiency = npass / len(mask)
+            effErr, effErrLo, effErrHi = get_eff_err(npass, len(mask), alpha=1-0.68)
             rate = efficiency * constants.RATE_NORM_FACTOR
+            rateErr = effErr * constants.RATE_NORM_FACTOR
             table.append(
+                # {"seed": seed, "npass": npass, "efficiency": efficiency, "effErr": effErr, "rate": rate, "rateErr": rateErr}
                 {"seed": seed, "npass": npass, "efficiency": efficiency, "rate": rate}
             )
             # Modify total mask
@@ -387,8 +412,10 @@ class MenuTable:
         ## Total OR of all seeds
         npass = np.sum(all_seeds_or_mask)
         efficiency = npass / len(all_seeds_or_mask)
+        effErr, effErrLo, effErrHi = get_eff_err(npass, len(all_seeds_or_mask), alpha=1-0.68)
         rate = efficiency * constants.RATE_NORM_FACTOR
         table.append(
+            # {"seed": "Total", "npass": npass, "efficiency": efficiency, "effErr": effErr, "rate": rate, "rateErr": rateErr}
             {"seed": "Total", "npass": npass, "efficiency": efficiency, "rate": rate}
         )
         table.append(
@@ -396,7 +423,9 @@ class MenuTable:
                 "seed": "Total Event Number",
                 "npass": len(all_seeds_or_mask),
                 "efficiency": np.nan,
+                # "effErr": np.nan,
                 "rate": np.nan,
+                # "rateErr": np.nan
             }
         )
         self.table = table
@@ -430,4 +459,7 @@ class MenuTable:
                 f.write(f"{seed['seed']},")
                 f.write(f"{seed['npass']},")
                 f.write(f"{seed['efficiency']},")
+                # f.write(f"{seed['effErr']},")
                 f.write(f"{seed['rate']}\n")
+                # f.write(f"{seed['rate']},")
+                # f.write(f"{seed['rateErr']}\n")
