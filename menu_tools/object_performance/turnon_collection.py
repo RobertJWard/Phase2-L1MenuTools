@@ -376,14 +376,23 @@ class TurnOnCollection:
         self._apply_reference_cuts()
         self._apply_reference_trafo()
 
-    def create_hists(self):
-        self._load_arrays()
-        self._apply_cuts()
+    def _skim(self):
         if not self.cfg_plot.matching:
             self._skim_to_hists()
         else:
-            self._match_test_to_ref()
             if self.cfg_plot.iso_vs_eff_plot:
                 self._skim_to_hists_dR_matched_Iso()
             else:
                 self._skim_to_hists_dR_matched()
+
+    def set_threshold(self, threshold):
+        """Re-histograms at a new threshold; loading, cuts and matching don't depend on it."""
+        self.threshold = threshold
+        self._skim()
+
+    def create_hists(self):
+        self._load_arrays()
+        self._apply_cuts()
+        if self.cfg_plot.matching:
+            self._match_test_to_ref()
+        self._skim()

@@ -364,10 +364,17 @@ class EfficiencyCentral:
         print(f"INFO: Loading object configs from configs/{self.config_version}/objects")
 
         for plot_name, cfg_plot in self.cfg_plots.items():
+            # The previous plotter also holds the old collection; release both
+            # before building the next, so two plots' arrays are never held at once.
+            turnon_collection = plotter = None
             for threshold in self.get_thresholds(cfg_plot):
                 print(f">>> Turn On {plot_name} ({threshold} GeV) <<<")
-                turnon_collection = TurnOnCollection(cfg_plot, threshold, plot_name, config_version=self.config_version, override_version=self.override_version)
-                turnon_collection.create_hists()
+                # Only the final histogramming depends on the threshold, so build underlying turnon-collection once per plot.
+                if turnon_collection is None:
+                    turnon_collection = TurnOnCollection(cfg_plot, threshold, plot_name, config_version=self.config_version, override_version=self.override_version)
+                    turnon_collection.create_hists()
+                else:
+                    turnon_collection.set_threshold(threshold)
 
                 plotter = EfficiencyPlotter(plot_name, cfg_plot, turnon_collection)
                 plotter.plot()
@@ -567,25 +574,32 @@ class ScalingCentral:
             scalings = {}
             scaling_function_params = {}
 
-            pbar = tqdm(total=len(plot_config.test_object_instances), desc="Objects")
+            # The turn-ons for every object and threshold come from one collection:
+            # only the final histogramming depends on the threshold.
+            thds_by_obj = {
+                str(test_obj): self._get_scaling_thresholds(cfg_plot, test_obj)
+                for test_obj in plot_config.test_object_instances
+            }
+            all_thds = list(dict.fromkeys(t for thds in thds_by_obj.values() for t in thds))
+            turnon_collection = TurnOnCollection(cfg_plot, all_thds[0], config_version=self.config_version, override_version=self.override_version)
+            turnon_collection.create_hists()
+            scaling_pct = turnon_collection.cfg_plot.scaling_pct
+            method = turnon_collection.cfg_plot.scaling_method
+            scaling_collection = ScalingCollection(cfg_plot, method, scaling_pct)
+            results = {}
+            for threshold in tqdm(all_thds, leave=False, desc="Thresholds"):
+                turnon_collection.set_threshold(threshold)
+                for test_obj in plot_config.test_object_instances:
+                    if threshold in thds_by_obj[str(test_obj)]:
+                        results[str(test_obj), threshold] = scaling_collection._compute_scalings(
+                            turnon_collection, test_obj, scaling_pct, method
+                        )
+
             for test_obj in plot_config.test_object_instances:
-                pbar.write(str(test_obj))
-                pbar.update(1)
-                scalings[str(test_obj)] = {}
-                thds = self._get_scaling_thresholds(cfg_plot, test_obj)
-                for threshold in tqdm(thds, leave=False, desc="Thresholds"):
-                    turnon_collection = TurnOnCollection(cfg_plot, threshold, config_version=self.config_version, override_version=self.override_version)
-                    turnon_collection.create_hists()
-                    scaling_pct = turnon_collection.cfg_plot.scaling_pct
-                    method = turnon_collection.cfg_plot.scaling_method
-                    scaling_collection = ScalingCollection(
-                        cfg_plot, method, scaling_pct
-                    )
-                    scalings[str(test_obj)][
-                        threshold
-                    ] = scaling_collection._compute_scalings(
-                        turnon_collection, test_obj, scaling_pct, method
-                    )
+                print(str(test_obj))
+                scalings[str(test_obj)] = {
+                    t: results[str(test_obj), t] for t in thds_by_obj[str(test_obj)]
+                }
                 # Fit parameters of scaling function
                 params = scaling_collection.fit_linear_function(scalings[str(test_obj)])
                 scaling_function_params[str(test_obj)] = params
