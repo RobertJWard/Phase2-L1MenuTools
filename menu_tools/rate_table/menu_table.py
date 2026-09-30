@@ -333,10 +333,24 @@ class MenuTable:
         Filtering the combinations after each cross mask is equivalent to ANDing
         them all, but keeps only two combination-length booleans live at a time.
         """
+        # A mask on a single leg can filter that leg's objects before the legs are
+        # combined: same result, far fewer combinations.
+        multi_leg_masks = []
+        for cross_mask_str in cross_mask_strs:
+            legs_in_mask = set(re.findall(r"leg\d", cross_mask_str))
+            leg = legs_in_mask.pop() if len(legs_in_mask) == 1 else None
+            if leg is None or "var" not in str(legs_arrays[leg].type):
+                multi_leg_masks.append(cross_mask_str)
+                continue
+            leg_array = legs_arrays[leg]
+            mask = eval(re.sub(r"(leg\d)", "leg_array", cross_mask_str))
+            mask = ak.fill_none(mask, False, axis=None)
+            legs_arrays = {**legs_arrays, leg: leg_array[mask]}
+
         combined_legs = self.get_combined_legs(legs_arrays, seed_legs)
 
         ## add cross_conditions
-        for cross_mask_str in cross_mask_strs:
+        for cross_mask_str in multi_leg_masks:
             eval_str = re.sub(r"(leg\d)", r"combined_legs['\1']", cross_mask_str)
             mask = ak.fill_none(eval(eval_str), False, axis=None)
             combined_legs = combined_legs[mask]
