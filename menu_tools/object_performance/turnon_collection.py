@@ -26,7 +26,11 @@ class ArrayLoader:
         """
         ## nano
         if ("_" in raw_key) and ("dr_0" not in raw_key):
-            key = raw_key.removeprefix(obj).split("_")[-1]
+            # Strip the exact `<obj>_` prefix: field names can contain underscores.
+            if raw_key.startswith(obj + "_"):
+                key = raw_key.removeprefix(obj + "_")
+            else:
+                key = raw_key.removeprefix(obj).split("_")[-1]
         ## menu ntuples
         else:
             key = raw_key.removeprefix(obj).lower()

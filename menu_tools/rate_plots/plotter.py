@@ -231,7 +231,12 @@ class RateComputer:
         """
         ## nano
         if "_" in raw_key:
-            key = raw_key.removeprefix(self.object.nano_obj_name).split("_")[-1]
+            # Strip the exact `<obj>_` prefix: field names can contain underscores.
+            prefix = self.object.nano_obj_name + "_"
+            if raw_key.startswith(prefix):
+                key = raw_key.removeprefix(prefix)
+            else:
+                key = raw_key.removeprefix(self.object.nano_obj_name).split("_")[-1]
         ## menu ntuples
         else:
             key = raw_key.removeprefix(self.object.nano_obj_name).lower()
