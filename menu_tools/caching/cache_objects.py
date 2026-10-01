@@ -307,9 +307,9 @@ class ObjectCacher:
         Checks if there is parquet file in cache
         with the name 'version_sample_object.parquet'
         """
-        cached_files = glob.glob(self.cache_out_path + "*")
+        # Check the one path rather than listing the whole cache directory.
         fpath = self.cache_out_path + f"{self.parquet_fname}.parquet"
-        return fpath in cached_files
+        return os.path.exists(fpath)
 
     def _save_array_to_parquet(self):
         """
