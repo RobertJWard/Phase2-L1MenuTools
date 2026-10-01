@@ -17,6 +17,7 @@ from menu_tools.object_performance.config import PerformancePlotConfig
 from menu_tools.object_performance.scaling_collection import ScalingCollection
 from menu_tools.utils import utils
 from menu_tools.utils.objects import Object
+from menu_tools.utils.plotting import add_watermark
 
 
 colors = [
@@ -80,16 +81,8 @@ class EfficiencyPlotter(Plotter):
         ax.set_xlim(self.cfg.bin_min, self.cfg.bin_max)
         ax.tick_params(direction="in")
         watermark = f"{self.version}_{self.plot_name}_{self.threshold} ({self.pu_value})"
-        ax.text(
-            0,
-            -0.1,
-            watermark,
-            color="grey",
-            alpha=0.2,
-            fontsize=20,
-            transform=ax.transAxes,
-        )
         fig.tight_layout()
+        add_watermark(ax, watermark)
 
     def _save_json(self, file_name):
         plot = {}
@@ -450,16 +443,8 @@ class ScalingPlotter(Plotter):
         ax.set_xlabel("L1 threshold [GeV]")
         ax.set_ylabel(f"{int(self.scaling_pct * 100)}% Location (gen, GeV)")
         watermark = f"{self.version}_{self.plot_name}"
-        ax.text(
-            0,
-            -0.1,
-            watermark,
-            color="grey",
-            alpha=0.2,
-            fontsize=20,
-            transform=ax.transAxes,
-        )
         fig.tight_layout()
+        add_watermark(ax, watermark)
         ax.set_xlim(0, _xlim_upper)
         ax.set_ylim(0, _ylim_upper)
 
