@@ -25,7 +25,7 @@ L1_DoubleTkMu0er1p4_SQ_OS_dR_Max1p4:
   leg2:
     threshold_cut:  offline_pt >= 1
     obj: L1gmtTkMuon:VLoose
-L1_DoubleTkMu4er1p4_SQ_OS_dR_Max1p6:
+L1_DoubleTkMu4er2p0_SQ_OS_dR_Max1p6:
   cross_masks:
     - (abs(leg1.eta) < 2.0)
     - (abs(leg2.eta) < 2.0)
@@ -243,7 +243,7 @@ L1_TkMu7_TkEle20:
     - abs(leg2.z0-leg1.z0) < 1
     - abs(leg2.eta) < 2.5
   leg1:
-    threshold_cut: pt >= 9
+    threshold_cut: offline_pt >= 9
     obj: L1gmtTkMuon:VLoose
   leg2:
     threshold_cut: offline_pt >= 24.0
@@ -253,7 +253,7 @@ L1_TkMu20_TkEle10:
     - abs(leg2.z0-leg1.z0) < 1
     - abs(leg2.eta) < 2.5
   leg1:
-    threshold_cut: pt >= 23.0
+    threshold_cut: offline_pt >= 23.0
     obj: L1gmtTkMuon:VLoose
   leg2:
     threshold_cut: offline_pt >= 13.0
@@ -263,7 +263,7 @@ L1_TkMu20_TkEle10:
 #     - abs(leg2.z0-leg1.z0) < 1
 #     - abs(leg2.eta) < 2.5
 #   leg1:
-#     threshold_cut: pt >= 9
+#     threshold_cut: offline_pt >= 9
 #     obj: L1gmtTkMuon:VLoose
 #   leg2:
 #     threshold_cut: offline_pt >= 24.0
@@ -584,7 +584,7 @@ L1_SingleDispMu_BMTF:
 L1_DoubleDispMu:
   cross_masks:
     - (abs(leg1.eta) < 2.0)
-    - (abs(leg1.eta) < 2.0)
+    - (abs(leg2.eta) < 2.0)
   leg1:
     threshold_cut: pt >= 6
     obj: L1gmtDispMuon:default
