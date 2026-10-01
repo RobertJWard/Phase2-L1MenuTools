@@ -15,8 +15,8 @@ MuonTFsMatchingBarrel:
   test_objects:
     L1gmtMuon:default:barrel: "pt"
     L1MuonKMTF:default:barrel: "pt"
-    L1MuonOMTF:default:barrel: "pt"
-    L1MuonEMTF:default:barrel: "pt"
+    # L1MuonOMTF:default:barrel: "pt"
+    # L1MuonEMTF:default:barrel: "pt"
     L1gmtTkMuon:default:barrel: "pt"
   xlabel: "Gen. $p_T$ (GeV)"
   ylabel: "Matching Efficiency (barrel)"
@@ -42,9 +42,9 @@ MuonTFsMatchingOverlap:
         - "abs({eta}) < 1.24"
   test_objects:
     L1gmtMuon:default:overlap: "pt"
-    L1MuonKMTF:default:overlap: "pt"
+    # L1MuonKMTF:default:overlap: "pt"
     L1MuonOMTF:default:overlap: "pt"
-    L1MuonEMTF:default:overlap: "pt"
+    # L1MuonEMTF:default:overlap: "pt"
     L1gmtTkMuon:default:overlap: "pt"
   xlabel: "Gen. $p_T$ (GeV)"
   ylabel: "Matching Efficiency (overlap)"
@@ -70,8 +70,8 @@ MuonTFsMatchingEndcap:
         - "abs({eta}) < 2.4"
   test_objects:
     L1gmtMuon:default:endcap: "pt"
-    L1MuonKMTF:default:endcap: "pt"
-    L1MuonOMTF:default:endcap: "pt"
+    # L1MuonKMTF:default:endcap: "pt"
+    # L1MuonOMTF:default:endcap: "pt"
     L1MuonEMTF:default:endcap: "pt"
     L1gmtTkMuon:default:endcap: "pt"
   xlabel: "Gen. $p_T$ (GeV)"

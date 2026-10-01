@@ -1,10 +1,10 @@
-MuonTFsTrigger_Barrel:
+MuonTFsMatchingBarrel:
   sample: DYLL_M50
   version: V50nano
   match_test_to_ref: True
   reference_object:
     object: "GenPart"
-    x_arg: "eta"
+    x_arg: "pt"
     label: "Gen Muons"
     cuts:
       event:
@@ -15,27 +15,23 @@ MuonTFsTrigger_Barrel:
   test_objects:
     L1gmtMuon:default:barrel: "pt"
     L1MuonKMTF:default:barrel: "pt"
-    # L1MuonOMTF:default:barrel: "pt"
-    # L1MuonEMTF:default:barrel: "pt"
+    L1MuonOMTF:default:barrel: "pt"
+    L1MuonEMTF:default:barrel: "pt"
     L1gmtTkMuon:default:barrel: "pt"
-  xlabel: "Gen. pT (GeV)"
-  ylabel: "Trigger Efficiency (barrel, L1 $p_T > <threshold>$ GeV)"
-  thresholds: [20, 25]
-  # scalings:
-  #   method: "naive"
-  #   threshold: 0.95
+  xlabel: "Gen. $p_T$ (GeV)"
+  ylabel: "Matching Efficiency (barrel)"
   binning:
     min: 0
-    max: 50
-    step: 1.5
+    max: 100
+    step: 3
 
-MuonTFsTrigger_Overlap:
+MuonTFsMatchingOverlap:
   sample: DYLL_M50
   version: V50nano
   match_test_to_ref: True
   reference_object:
     object: "GenPart"
-    x_arg: "eta"
+    x_arg: "pt"
     label: "Gen Muons"
     cuts:
       event:
@@ -46,28 +42,24 @@ MuonTFsTrigger_Overlap:
         - "abs({eta}) < 1.24"
   test_objects:
     L1gmtMuon:default:overlap: "pt"
-    # L1MuonKMTF:default:overlap: "pt"
+    L1MuonKMTF:default:overlap: "pt"
     L1MuonOMTF:default:overlap: "pt"
-    # L1MuonEMTF:default:overlap: "pt"
+    L1MuonEMTF:default:overlap: "pt"
     L1gmtTkMuon:default:overlap: "pt"
-  xlabel: "Gen. pT (GeV)"
-  ylabel: "Trigger Efficiency (overlap, L1 $p_T > <threshold>$ GeV)"
-  thresholds: [20, 25]
-  # scalings:
-  #   method: "naive"
-  #   threshold: 0.95
+  xlabel: "Gen. $p_T$ (GeV)"
+  ylabel: "Matching Efficiency (overlap)"
   binning:
     min: 0
-    max: 50
-    step: 1.5
+    max: 100
+    step: 3
 
-MuonTFsTrigger_Endcap:
+MuonTFsMatchingEndcap:
   sample: DYLL_M50
   version: V50nano
   match_test_to_ref: True
   reference_object:
     object: "GenPart"
-    x_arg: "eta"
+    x_arg: "pt"
     label: "Gen Muons"
     cuts:
       event:
@@ -75,19 +67,16 @@ MuonTFsTrigger_Endcap:
         - "abs({pdgId}) == 13"
       object:
         - "abs({eta}) > 1.24"
+        - "abs({eta}) < 2.4"
   test_objects:
     L1gmtMuon:default:endcap: "pt"
-    # L1MuonKMTF:default:endcap: "pt"
-    # L1MuonOMTF:default:endcap: "pt"
+    L1MuonKMTF:default:endcap: "pt"
+    L1MuonOMTF:default:endcap: "pt"
     L1MuonEMTF:default:endcap: "pt"
     L1gmtTkMuon:default:endcap: "pt"
-  xlabel: "Gen. pT (GeV)"
-  ylabel: "Trigger Efficiency (endcap, L1 $p_T > <threshold>$ GeV)"
-  thresholds: [20, 25]
-  # scalings:
-  #   method: "naive"
-  #   threshold: 0.95
+  xlabel: "Gen. $p_T$ (GeV)"
+  ylabel: "Matching Efficiency (endcap)"
   binning:
     min: 0
-    max: 50
-    step: 1.5
+    max: 100
+    step: 3
