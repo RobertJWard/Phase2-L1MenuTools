@@ -315,10 +315,18 @@ class ObjectCacher:
         """
         Save
         """
+        # An empty array would be cached and then skipped on every later run.
+        if len(self._final_ak_array) == 0:
+            raise RuntimeError(
+                f"No events read for {self.parquet_fname}; not writing an empty cache file"
+            )
+        fpath = self.cache_out_path + f"{self.parquet_fname}.parquet"
+        # Write then rename, so an interrupted write never leaves a complete-looking file.
         ak.to_parquet(
             self._final_ak_array,
-            destination=self.cache_out_path + f"{self.parquet_fname}.parquet",
+            destination=fpath + ".tmp",
         )
+        os.replace(fpath + ".tmp", fpath)
 
     def load(self):
         # print(f"Process {self._object + self._part_type} object...")
@@ -333,6 +341,11 @@ class ObjectCacher:
 
         if self._dryrun:
             return
+
+        if not glob.glob(self._ntuple_path):
+            raise FileNotFoundError(
+                f"No input ntuples match `{self._ntuple_path}`; not writing {self.parquet_fname}"
+            )
 
         start_time = time.time()
         self._concat_array_from_ntuples()
