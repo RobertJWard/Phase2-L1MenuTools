@@ -17,7 +17,19 @@
   git clone git@github.com:cms-l1-dpg/Phase2-L1MenuTools.git
   ```
 
-  A standard venv with Python3.11 can be created on lxplus
+  The quickest way to set up the environment is
+
+  ```bash
+  scripts/setup_pyenv.sh
+  source setup.sh
+  ```
+
+  which creates the venv `pyenv/` with Python 3.11, installs the tools into it,
+  and makes it put a complete TeX Live (from cvmfs) on `PATH` when activated, as
+  needed by `rate_table_tex` (the lxplus system TeX Live lacks some packages).
+  Afterwards `source setup.sh` is all that is needed in a new shell.
+
+  Alternatively, a standard venv with Python3.11 can be created on lxplus
   via `python3.11 -m venv <name_of_venv>` and all necessary
   dependencies installed via `pip install -e .`:
 
@@ -36,4 +48,5 @@
   object_performance <path_to_config>
   rate_plots <path_to_config>
   rate_table <path_to_config>
+  rate_table_tex <path_to_config>
   ```
