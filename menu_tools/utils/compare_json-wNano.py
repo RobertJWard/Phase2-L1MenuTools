@@ -19,8 +19,10 @@ def load_json(fname):
         return plot
 
 # Function to strip the prefix like Vxxnano_
+# Hotfix: also drop "_VtxFindOff" so e.g. V49nano_AR25_VtxFindOff shows as AR25
 def strip_prefix(s):
-    return re.sub(r"^V\d+nano_", "", s)
+    s = re.sub(r"^V\d+nano_", "", s)
+    return re.sub(r"_VtxFindOff$", "", s)
 
 def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], ptype="turnon",
                    lss=["-", "--"], keys=None, markers=["o", "s"]):

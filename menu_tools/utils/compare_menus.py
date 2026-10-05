@@ -41,8 +41,10 @@ def get_df_new_csv(fname):
 #     plt.close()
 
 # Function to strip the prefix like Vxxnano_
+# Hotfix: also drop "_VtxFindOff" so e.g. V49nano_AR25_VtxFindOff shows as AR25
 def strip_prefix(s):
-    return re.sub(r"^V\d+nano_", "", s)
+    s = re.sub(r"^V\d+nano_", "", s)
+    return re.sub(r"_VtxFindOff$", "", s)
 
 
 def main():
@@ -78,6 +80,12 @@ def main():
             labels.append(strip_prefix(version))
         else:  # Mixed case
             labels.append(f"{strip_prefix(version)}_{menu}")
+    # Labels key the per-version dataframes, so they must stay unique: if
+    # stripping makes two collide (e.g. V49nano_AR25 vs V49nano_AR25_VtxFindOff),
+    # keep the full version names instead.
+    if len(set(labels)) < len(labels):
+        labels = [f"{v}_{m}" if len(set(menus)) > 1 or len(set(versions)) == 1 else v
+                  for v, m in zip(versions, menus)]
 
     # Define input files
     base_path = "outputs"
