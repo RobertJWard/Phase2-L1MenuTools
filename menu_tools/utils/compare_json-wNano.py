@@ -245,6 +245,9 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
     elif ptype == "turnon":
         axs[0].set_ylabel(nano_plot.get("ylabel", ""), fontsize="small")
         axs[1].set_xlabel(nano_plot.get("xlabel", ""))
+        # Fix the efficiency axis to the same range object_performance uses, so
+        # flat curves (e.g. efficiency vs eta) are not autoscaled into a zoom.
+        axs[0].set_ylim(0, 1.1)
         axs[1].set_ylim(-.1, .1)
         
     for ax in axs: ax.grid()
