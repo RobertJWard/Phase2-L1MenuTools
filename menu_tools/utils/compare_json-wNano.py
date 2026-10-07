@@ -35,8 +35,70 @@ def version_label(version, all_versions):
         return "140PU"
     return strip_prefix(version)
 
+
+# Hotfix: pinned colours for objects whose position-based colour differs
+# between plots. Looked up as the full plot key (e.g. L1caloTau:default:endcap),
+# then <object>:<id>:<region> with the region taken from the plot name
+# (Barrel/Endcap) for plots whose keys carry no region, then <object>:<id>,
+# then <object>. Anything not listed keeps its position-based colour.
+COLOR_OVERRIDES = {
+    # EG: match the EG rates, where L1tkIsoPhoton is the 4th object
+    "L1tkPhoton:Iso": "C3",
+    "L1tkPhoton:NoIso": "C4",
+    # Taus: barrel as before, endcap NN red / calo green, and the same per
+    # region in the by-region rates
+    "L1nnPuppiTau:default:barrel": "C0",
+    "L1caloTau:default:barrel": "C1",
+    "L1nnPuppiTau:default:endcap": "C3",
+    "L1caloTau:default:endcap": "C2",
+    # Jets: calo green and tracker red, also where other jets are missing
+    "L1caloJet": "C2",
+    "L1TrackJet": "C3",
+    # Sums: tracker sums red, to match the tracker jets
+    "L1TrackHT": "C3",
+    "L1TrackMET": "C3",
+}
+
+
+def _region_from_plot_name(plot_name):
+    for region in ("barrel", "endcap"):
+        if region in plot_name.lower():
+            return region
+    return None
+
+
+def pinned_color(key, plot_name=""):
+    parts = key.split(":")
+    candidates = [key]
+    region = _region_from_plot_name(plot_name)
+    if region and len(parts) == 2:
+        candidates.append(f"{key}:{region}")
+    candidates += [":".join(parts[:2]), parts[0]]
+    for cand in candidates:
+        if cand in COLOR_OVERRIDES:
+            return COLOR_OVERRIDES[cand]
+    return None
+
+
+def assign_colors(keys, plot_name=""):
+    """Colour per plot key: pinned colours first, then the usual C<position>,
+    moving on to the next free colour if that one is pinned to another key."""
+    pinned = {k: pinned_color(k, plot_name) for k in keys}
+    used = {c for c in pinned.values() if c}
+    colors = {}
+    for n, key in enumerate(keys):
+        if pinned[key]:
+            colors[key] = pinned[key]
+            continue
+        i = n
+        while f"C{i}" in used:
+            i += 1
+        colors[key] = f"C{i}"
+        used.add(colors[key])
+    return colors
+
 def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], ptype="turnon",
-                   lss=["-", "--"], keys=None, markers=["o", "s"]):
+                   lss=["-", "--"], keys=None, markers=["o", "s"], plot_name=""):
     vlabels = [version_label(v, sfxs) for v in sfxs]
     
     fig, axs = plt.subplots(2, 1, figsize=(10, 12),
@@ -77,6 +139,7 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
             if missing:
                 print(f"Warning: {key} missing in {', '.join(missing)}. Skipping...")
         
+    colors = assign_colors(clean_keys + only1_keys + only2_keys + only3_keys, plot_name)
     jTot = 0
     
     # Plot keys that exist in all relevant plots
@@ -85,7 +148,7 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
         if v2_plot is not None:
             plots.append(v2_plot[key])
             
-        color = f"C{j}"
+        color = colors[key]
         jTot += 1
         
         for i, p1 in enumerate(plots):
@@ -171,7 +234,7 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
     # Handle keys only in specific plots
     for j, key in enumerate(only1_keys):
         plots = [nano_plot[key]]
-        color = f"C{jTot}"
+        color = colors[key]
         jTot += 1
         for i, p1 in enumerate(plots):
             label = f"{p1['label']}"
@@ -191,7 +254,7 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
 
     for j, key in enumerate(only2_keys):
         plots = [menu_plot[key]]
-        color = f"C{jTot}"
+        color = colors[key]
         jTot += 1
         for i, p1 in enumerate(plots):
             label = f"{vlabels[1]}, {p1['label']}"
@@ -211,7 +274,7 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
 
     for j, key in enumerate(only3_keys):
         plots = [v2_plot[key]]
-        color = f"C{jTot}"
+        color = colors[key]
         jTot += 1
         for i, p1 in enumerate(plots):
             label = f"{vlabels[2]}, {p1['label']}"
@@ -329,7 +392,8 @@ def main():
         f = comp_nano_plots(plot1, plot2, v2_plot, sfxs=sfxs, 
                        lss=["-", "--"],
                        markers=[".", "o"],
-                       ptype=ptype)
+                       ptype=ptype,
+                       plot_name=os.path.basename(v0_json))
 
         # Construct output filename
         comparison_name = f"{v0}vs{v1}"
