@@ -15,7 +15,6 @@ TausMatchingBarrelAR:
   test_objects:
     L1nnPuppiTau:default: "pt"
     L1caloTau:default: "pt"
-    L1nnCaloTau:default: "pt"
   xlabel: "Gen. $p_T$ (GeV)"
   ylabel: "Matching Efficiency (Barrel)"
   binning:
@@ -40,7 +39,6 @@ TausMatchingEndcapAR:
   test_objects:
     L1nnPuppiTau:default: "pt"
     L1caloTau:default: "pt"
-    L1nnCaloTau:default: "pt"
   xlabel: "Gen. $p_T$ (GeV)"
   ylabel: "Matching Efficiency (Endcap)"
   binning:
@@ -65,7 +63,6 @@ TausMatchingAllNNTauAR:
   test_objects:
     L1nnPuppiTau:default: "pt"
     L1caloTau:default: "pt"
-    L1nnCaloTau:default: "pt"
   xlabel: "Gen. $p_T$ (GeV)"
   ylabel: "Matching Efficiency"
   binning:

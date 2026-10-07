@@ -1,5 +1,5 @@
 L1gmtTkMuon:
-  label: "GMT TkMuon"
+  label: "TkMuon"
   match_dR: 0.1
   eta_ranges:
     inclusive: [0, 7]
@@ -8,34 +8,34 @@ L1gmtTkMuon:
     endcap: [1.24, 2.4]
   ids:
     default:
-      label: "GMT TkMuon"
+      label: "TkMuon"
       cuts:
         inclusive:
           - "(({hwQual}>>1)&1 == 1) | (({pt} > 8) & (({hwQual}>>0)&1 == 1))" # Loose (bit 2) for pt < 8 VLoose (bit 1) for pt > 8
           # - "({hwQual}>>0)&1 == 1"
     VLoose: # x.numberOfMatches() > 0
-      label: "GMT TkMuon, VLoose ID" 
+      label: "TkMuon, VLoose ID" 
       cuts:
         inclusive:
           - "({hwQual}>>0)&1 == 1"
     Loose: # x.numberOfMatches() >1
-      label: "GMT TkMuon, Loose ID" 
+      label: "TkMuon, Loose ID" 
       cuts:
         inclusive:
           - "({hwQual}>>1)&1 == 1"
     Medium: # x.stubs().size()>1
-      label: "GMT TkMuon, Medium ID" 
+      label: "TkMuon, Medium ID" 
       cuts:
         inclusive:
           - "({hwQual}>>2)&1 == 1"
     Tight: # x.numberOfMatches()>2
-      label: "GMT TkMuon, Tight ID" 
+      label: "TkMuon, Tight ID" 
       cuts:
         inclusive:
           - "({hwQual}>>3)&1 == 1"
 
 L1gmtMuon:
-  label: "GMT Muon"
+  label: "Muon"
   match_dR: 0.6
   eta_ranges:
     inclusive: [0, 7]
@@ -50,12 +50,12 @@ L1gmtMuon:
         endcap:
           - "{hwQual} >= 14"
     dR0p6:
-      label: "GMT Muon, match dR < 0.6" 
+      label: "Muon, match dR < 0.6" 
       match_dR: 0.6
       cuts: {}
 
 L1gmtDispMuon:
-  label: "GMT Displaced Muon"
+  label: "Displaced Muon"
   match_dR: 0.6
   eta_ranges:
     inclusive: [0, 7]

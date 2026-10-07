@@ -15,7 +15,6 @@ TauMatching_Eta_Pt40To100AR:
   test_objects:
     L1nnPuppiTau:default: "eta"
     L1caloTau:default: "eta"
-    L1nnCaloTau:default: "eta"
   xlabel: "Gen. $\\eta$"
   ylabel: "Matching Efficiency (40-100 GeV)"
   binning:
@@ -39,7 +38,6 @@ TauMatching_Eta_Pt100ToInfAR:
   test_objects:
     L1nnPuppiTau:default: "eta"
     L1caloTau:default: "eta"
-    L1nnCaloTau:default: "eta"
   xlabel: "Gen. $\\eta$"
   ylabel: "Matching Efficiency (>100 GeV)"
   binning:
