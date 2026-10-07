@@ -12,9 +12,11 @@ plt.rcParams['figure.facecolor'] = 'white'
 plt.rcParams["font.size"] = 14
 
 def get_df_new_csv(fname):
-    """Load CSV file into a dataframe."""
-    df = pd.read_csv(fname, names=["Seed", "counts", "eff", "rate"], skiprows=1)
-    return df
+    """Load a rate-table CSV, selecting columns by header name so that
+    extra columns (e.g. the rate/efficiency uncertainties) are harmless.
+    Works for tables written both before and after the uncertainties."""
+    df = pd.read_csv(fname)
+    return df.rename(columns={"seed": "Seed", "npass": "counts", "efficiency": "eff"})
 
 # def save_table_as_image(df, filename, output_dir):
 #     """Save a dataframe as a table in PNG and PDF formats."""
