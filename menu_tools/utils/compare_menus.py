@@ -47,6 +47,17 @@ def strip_prefix(s):
     return re.sub(r"_VtxFindOff$", "", s)
 
 
+# Hotfix: when comparing <version> against <version>_140PU, label them by
+# pileup instead, so e.g. V50nano_170pre5 / V50nano_170pre5_140PU show as
+# 200PU / 140PU regardless of the order they are given in.
+def version_label(version, all_versions):
+    if version + "_140PU" in all_versions:
+        return "200PU"
+    if version.endswith("_140PU") and version.removesuffix("_140PU") in all_versions:
+        return "140PU"
+    return strip_prefix(version)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Compare L1T Phase2 menu rates from two or three versions.")
     parser.add_argument("--v0", required=True, help="Reference version name (e.g., V45nano_L1EGupdate1)")
@@ -75,11 +86,11 @@ def main():
     labels = []
     for i, (version, menu) in enumerate(zip(versions, menus)):
         if len(set(versions)) == 1:  # All versions are the same
-            labels.append(f"{strip_prefix(version)}_{menu}")
+            labels.append(f"{version_label(version, versions)}_{menu}")
         elif len(set(menus)) == 1:  # All menus are the same
-            labels.append(strip_prefix(version))
+            labels.append(version_label(version, versions))
         else:  # Mixed case
-            labels.append(f"{strip_prefix(version)}_{menu}")
+            labels.append(f"{version_label(version, versions)}_{menu}")
     # Labels key the per-version dataframes, so they must stay unique: if
     # stripping makes two collide (e.g. V49nano_AR25 vs V49nano_AR25_VtxFindOff),
     # keep the full version names instead.

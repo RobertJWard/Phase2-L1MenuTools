@@ -24,8 +24,20 @@ def strip_prefix(s):
     s = re.sub(r"^V\d+nano_", "", s)
     return re.sub(r"_VtxFindOff$", "", s)
 
+
+# Hotfix: when comparing <version> against <version>_140PU, label them by
+# pileup instead, so e.g. V50nano_170pre5 / V50nano_170pre5_140PU show as
+# 200PU / 140PU regardless of the order they are given in.
+def version_label(version, all_versions):
+    if version + "_140PU" in all_versions:
+        return "200PU"
+    if version.endswith("_140PU") and version.removesuffix("_140PU") in all_versions:
+        return "140PU"
+    return strip_prefix(version)
+
 def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], ptype="turnon",
                    lss=["-", "--"], keys=None, markers=["o", "s"]):
+    vlabels = [version_label(v, sfxs) for v in sfxs]
     
     fig, axs = plt.subplots(2, 1, figsize=(10, 12),
                             sharex=True,
@@ -182,7 +194,7 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
         color = f"C{jTot}"
         jTot += 1
         for i, p1 in enumerate(plots):
-            label = f"{strip_prefix(sfxs[1])}, {p1['label']}"
+            label = f"{vlabels[1]}, {p1['label']}"
 
             if ptype == "scalings":
                 axs[0].plot(p1["xvals"], p1["yvals"], color=color, marker=markers[1],
@@ -202,7 +214,7 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
         color = f"C{jTot}"
         jTot += 1
         for i, p1 in enumerate(plots):
-            label = f"{strip_prefix(sfxs[2])}, {p1['label']}"
+            label = f"{vlabels[2]}, {p1['label']}"
 
             if ptype == "scalings":
                 axs[0].plot(p1["xvals"], p1["yvals"], color=color, marker=markers[1],
@@ -219,13 +231,13 @@ def comp_nano_plots(nano_plot, menu_plot, v2_plot=None, sfxs=["v22", "v27"], pty
 
     # Add legend entries for version styles (without markers, at the end)
     if ptype == "turnon":
-        axs[0].errorbar([], [], yerr=[], label=f"{strip_prefix(sfxs[1])}", ls="--", color="grey", mfc="none")
+        axs[0].errorbar([], [], yerr=[], label=f"{vlabels[1]}", ls="--", color="grey", mfc="none")
         if v2_plot is not None and len(sfxs) > 2:
-            axs[0].errorbar([], [], yerr=[], label=f"{strip_prefix(sfxs[2])}", ls=":", color="grey", mfc="none")
+            axs[0].errorbar([], [], yerr=[], label=f"{vlabels[2]}", ls=":", color="grey", mfc="none")
     else:
-        axs[0].plot([], [], color="grey", label=f"{strip_prefix(sfxs[1])}", ls="--")
+        axs[0].plot([], [], color="grey", label=f"{vlabels[1]}", ls="--")
         if v2_plot is not None and len(sfxs) > 2:
-            axs[0].plot([], [], color="grey", label=f"{strip_prefix(sfxs[2])}", ls=":")
+            axs[0].plot([], [], color="grey", label=f"{vlabels[2]}", ls=":")
 
     # make axis stuff
     axs[0].legend(fontsize="x-small")
